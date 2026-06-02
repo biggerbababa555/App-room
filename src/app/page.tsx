@@ -16,7 +16,7 @@ const AGENTS: AgentInfo[] = [
   {
     id: "big",
     name: "Big",
-    department: "Founder",
+    department: "Frontend Dev.",
     position: { x: 50, y: 50 }, // Percentages for center
     imageSrc: "/character/Big/big-stand.png",
   },

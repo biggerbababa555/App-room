@@ -11,10 +11,43 @@ interface Props {
 
 export default function ChatSidebar({ agent, isOpen, onClose }: Props) {
   const [input, setInput] = useState("");
-  const { messages, sendMessage, setMessages } = useChat({
-    api: "/api/chat",
-    body: { agentId: agent?.id },
-  });
+  const [messages, setMessages] = useState<any[]>([]);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    const userMsg = { id: Date.now().toString(), role: "user", content: input };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [...messages, userMsg], agentId: agent?.id }),
+      });
+      if (!res.body) return;
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let botContent = "";
+      const botId = (Date.now() + 1).toString();
+      
+      setMessages((prev) => [...prev, { id: botId, role: "assistant", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        botContent += decoder.decode(value, { stream: true });
+        setMessages((prev) => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = { id: botId, role: "assistant", content: botContent };
+          return newMessages;
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -95,9 +128,7 @@ export default function ChatSidebar({ agent, isOpen, onClose }: Props) {
           <div className="p-4 bg-zinc-800 border-t-4 border-zinc-700">
             <form onSubmit={(e) => {
               e.preventDefault();
-              if (!input.trim()) return;
-              sendMessage({ content: input, role: "user" });
-              setInput("");
+              sendMessage();
             }} className="flex flex-col gap-2">
               <input
                 value={input}

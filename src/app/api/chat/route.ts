@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google";
+import { groq } from "@ai-sdk/groq";
 import { streamText } from "ai";
 import fs from "fs/promises";
 import path from "path";
@@ -22,12 +22,11 @@ export async function POST(req: Request) {
     }
 
     const result = await streamText({
-      model: google("gemini-1.5-flash"),
+      model: groq("llama-3.3-70b-versatile"),
       system: systemPrompt,
       messages,
     });
-
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error: any) {
     console.error("Chat API Error:", error);
     return new Response("Internal Server Error", { status: 500 });

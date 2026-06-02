@@ -1,11 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --font-pixel: var(--font-press-start-2p);
+  --font-pixel: var(--font-lana-pixel), monospace;
+  --font-sans: var(--font-lana-pixel), sans-serif;
 }
 
 @layer base {
+  * {
+    font-family: var(--font-lana-pixel), monospace !important;
+  }
   body {
-    font-family: var(--font-press-start-2p), monospace;
+    font-family: var(--font-lana-pixel), monospace !important;
   }
 }
