@@ -1,8 +1,6 @@
 import { groq } from "@ai-sdk/groq";
-import { streamText } from "ai";
+import { generateText } from "ai";
 import { AGENT_PROMPTS } from "@/lib/agent-prompts";
-
-export const runtime = "edge";
 
 export async function POST(req: Request) {
   try {
@@ -15,12 +13,15 @@ export async function POST(req: Request) {
     const systemPrompt = AGENT_PROMPTS[agentId] || 
       "You are a helpful AI assistant in an 8-bit virtual office. Keep your answers concise.";
 
-    const result = await streamText({
+    const { text } = await generateText({
       model: groq("llama-3.3-70b-versatile"),
       system: systemPrompt,
       messages,
     });
-    return result.toTextStreamResponse();
+
+    return new Response(text, {
+      headers: { "Content-Type": "text/plain; charset=utf-8" }
+    });
   } catch (error: any) {
     console.error("Chat API Error:", error);
     return new Response("Internal Server Error", { status: 500 });
